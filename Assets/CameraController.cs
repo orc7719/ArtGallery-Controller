@@ -8,7 +8,7 @@ public class CameraController : MonoBehaviour
 
     [SerializeField] float sensitivityX = 10f;
     [SerializeField] float sensitivityY = 10f;
-    float controllerDeadzone;
+    float controllerDeadzone = 0.25f;
 
     float rotationX = 0.0f;
     float rotationY = 0.0f;
@@ -33,7 +33,14 @@ public class CameraController : MonoBehaviour
         transform.localRotation = Quaternion.AngleAxis(rotationX, Vector3.up);
         transform.localRotation *= Quaternion.AngleAxis(rotationY, Vector3.left);
 
-        transform.position += transform.forward * Input.GetAxis("Vertical")* speed * Time.deltaTime;
-        transform.position += transform.right * Input.GetAxis("Horizontal")* speed * Time.deltaTime;
+        Vector2 stickInputMove = new Vector2(Input.GetAxis("Vertical"), Input.GetAxis("Horizontal"));
+        if (stickInputMove.magnitude < controllerDeadzone)
+            stickInputMove = Vector2.zero;
+        else
+            stickInputMove = stickInputMove.normalized * ((stickInputMove.magnitude - controllerDeadzone) / (1 - controllerDeadzone));
+
+        transform.position += transform.forward * stickInputMove.x* speed * Time.deltaTime;
+        transform.position += transform.right * stickInputMove.y* speed * Time.deltaTime;
+        transform.position += transform.up * Input.GetAxis("Ascend") * speed * Time.deltaTime;
     }
 }
